@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour
 	public Vector3 selectedZombieScale;
 	public Vector3 unselectedZombieScale;
 
+	private int lastZombiePushed;
 	private int selectedZombieIndex;
 	private int score = 0;
 
@@ -29,44 +30,68 @@ public class GameController : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
+		this.RemoveZombieIfNeeded ();
 		this.GetNewZombieIndex();
 		this.PushZombieUp();
 	}
 
 	private void GetNewZombieIndex()
 	{
-		int newSelectedZombieIndex = this.selectedZombieIndex;
-
 		if (Input.GetKeyDown(KeyCode.RightArrow) == true)
 		{
-			if (newSelectedZombieIndex + 1 == this.listZombie.Count)
-			{
-				newSelectedZombieIndex = 0;
-			}
-			else
-			{
-				newSelectedZombieIndex = newSelectedZombieIndex + 1;
-			}
+			this.SelectZombieRight ();
 		}
 
 		if (Input.GetKeyDown(KeyCode.LeftArrow) == true)
 		{
-			if (newSelectedZombieIndex == 0)
-			{
-				newSelectedZombieIndex = this.listZombie.Count - 1;
-			}
-			else
-			{
-				newSelectedZombieIndex = this.selectedZombieIndex - 1;
-			}
+			this.SelectZombieLeft ();
+		}
+	}
+
+	private void SelectZombieLeft()
+	{
+		int newSelectedZombieIndex = this.selectedZombieIndex;
+
+		if (newSelectedZombieIndex == 0)
+		{
+			newSelectedZombieIndex = this.listZombie.Count - 1;
+		}
+		else
+		{
+			newSelectedZombieIndex = this.selectedZombieIndex - 1;
 		}
 
-		if (this.selectedZombieIndex != newSelectedZombieIndex)
+		this.UnselecAndSelectZombie (newSelectedZombieIndex);
+	}
+
+	private void SelectZombieRight()
+	{
+		int newSelectedZombieIndex = this.selectedZombieIndex;
+
+		if (newSelectedZombieIndex + 1 == this.listZombie.Count)
+		{
+			newSelectedZombieIndex = 0;
+		}
+		else
+		{
+			newSelectedZombieIndex = newSelectedZombieIndex + 1;
+		}
+
+		this.UnselecAndSelectZombie (newSelectedZombieIndex);
+	}
+
+	private void UnselecAndSelectZombie(int newSelectedZombieIndex)
+	{
+		if (this.selectedZombieIndex != newSelectedZombieIndex || newSelectedZombieIndex == 0)
 		{
 			this.UnselectZombie();
 			this.selectedZombieIndex = newSelectedZombieIndex;
-			this.selectedZombie = this.listZombie[this.selectedZombieIndex];
-			this.SelectZombie();
+			Debug.Log ("SelectedZombieIndex: " + this.selectedZombieIndex + " New Selected Zombie: " + newSelectedZombieIndex + " Total Zombie List: " + this.listZombie.Count);
+			if (this.listZombie.Count != 0)
+			{
+				this.selectedZombie = this.listZombie[this.selectedZombieIndex];
+				this.SelectZombie();	
+			}
 		}
 	}
 
@@ -76,6 +101,8 @@ public class GameController : MonoBehaviour
 		{
 			Rigidbody rigidBody = this.selectedZombie.GetComponent<Rigidbody>();
 			rigidBody.AddForce(new Vector3(0, 0, 10f), ForceMode.Impulse);
+
+			this.lastZombiePushed = this.selectedZombieIndex;
 		}
 	}
 
@@ -98,5 +125,28 @@ public class GameController : MonoBehaviour
 	private void UpdateScore()
 	{
 		this.textScore.text = "Score: " + this.score;
+	}
+
+	private void RemoveZombieIfNeeded()
+	{
+		for (int i = 0; i < this.listZombie.Count; i++)
+		{
+			GameObject currentZombie = this.listZombie [i];
+
+			bool outsideBlock = currentZombie.transform.position.z <= -11;
+
+			if (currentZombie.transform.position.z >= 8 || (outsideBlock && currentZombie == this.selectedZombie)) 
+			{
+				this.listZombie.Remove (currentZombie);
+
+				//verify if the user did not changed the zombie position
+				if (this.lastZombiePushed == this.selectedZombieIndex || outsideBlock)
+				{
+					this.SelectZombieLeft ();
+				}
+
+				Debug.Log ("Removed Zombie. Total zombies now: " + this.listZombie.Count);
+			}
+		}
 	}
 }
