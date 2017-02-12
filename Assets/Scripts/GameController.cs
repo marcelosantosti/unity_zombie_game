@@ -1,16 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour 
 {
 	public GameObject selectedZombie;
 	public List<GameObject> listZombie;
+	public Text textScore;
 
 	public Vector3 selectedZombieScale;
 	public Vector3 unselectedZombieScale;
 
 	private int selectedZombieIndex;
+	private int score = 0;
 
 	// Use this for initialization
 	void Start () 
@@ -19,6 +22,8 @@ public class GameController : MonoBehaviour
 		{
 			this.SelectZombie();
 		}
+
+		this.UpdateScore ();
 	}
 	
 	// Update is called once per frame
@@ -82,5 +87,16 @@ public class GameController : MonoBehaviour
 	private void UnselectZombie()
 	{
 		this.selectedZombie.transform.localScale = this.unselectedZombieScale;
+	}
+
+	public void AddScore()
+	{
+		this.score = this.score + 1;
+		this.UpdateScore ();
+	}
+
+	private void UpdateScore()
+	{
+		this.textScore.text = "Score: " + this.score;
 	}
 }
