@@ -136,6 +136,7 @@ public class GameController : MonoBehaviour
 			bool outsideBlock = currentZombie.transform.position.z <= -11;
 
 			if (currentZombie.transform.position.z >= 8 || (outsideBlock && currentZombie == this.selectedZombie)) 
+				
 			{
 				this.listZombie.Remove (currentZombie);
 
